@@ -1,0 +1,49 @@
+{
+  "charactersPerSecond": 28,
+  "speakers": {
+    "hero": {
+      "name": "勇者·vibe仔",
+      "portrait": "assets/portraits/hero.png",
+      "nameEnglish": "Hero · Vibe Kid"
+    },
+    "slime": {
+      "name": "任务派发员·史莱姆",
+      "portrait": "assets/portraits/slime.png",
+      "nameEnglish": "Task Dispatcher · Slime"
+    }
+  },
+  "intro": [
+    {
+      "speaker": "slime",
+      "text": "员工，别盯钟了。\n下班前顺手接个需求。",
+      "english": "Contractor, stop staring at the clock.\nJust one quick task before you leave."
+    },
+    {
+      "speaker": "hero",
+      "text": "17:29了。你这个“顺手”，\n是不是要顺到明天？",
+      "english": "It is 17:29. Does your quick task\ncome with a complimentary tomorrow?"
+    },
+    {
+      "speaker": "slime",
+      "text": "外包仔，需求只有亿点点。\n来，碰我一下就算你签收。",
+      "english": "Contractor, it is only a tiny billion tasks.\nTouch me and you accept the assignment."
+    },
+    {
+      "speaker": "hero",
+      "text": "那我这双腿，今天就是拒收键。",
+      "english": "Then these legs are my reject button."
+    }
+  ],
+  "caught": [
+    {
+      "speaker": "slime",
+      "text": "跑得挺快啊，外包仔。\n需求已签收，今晚辛苦一下。",
+      "english": "Nice sprint, contractor.\nTask accepted. Enjoy your evening shift."
+    },
+    {
+      "speaker": "hero",
+      "text": "我只是碰了你一下！\n这也能算签收？！",
+      "english": "I only bumped into you!\nThat counts as an electronic signature?!"
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "windowTitle": "勇者只想下班",
+  "caughtTitle": "加班委托已签收",
+  "caughtInstruction": "按 R，再争取一次",
+  "pausedTitle": "已暂停",
+  "pausedInstruction": "按空格或 Esc 继续",
+  "caughtTitleEnglish": "OVERTIME ACCEPTED",
+  "caughtInstructionEnglish": "R: try again",
+  "pausedTitleEnglish": "PAUSED",
+  "pausedInstructionEnglish": "Space / Esc: resume",
+  "doorCountdown": "距开门 {seconds} 秒",
+  "doorCountdownEnglish": "Door opens in {seconds}s",
+  "doorOpenInstruction": "门已开，走向右下方门口！",
+  "doorOpenInstructionEnglish": "Door open: reach the bottom-right exit!"
+}

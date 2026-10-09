@@ -1,0 +1,53 @@
+{
+  "canvas": [
+    640,
+    360
+  ],
+  "movementBounds": [
+    80,
+    172,
+    548,
+    328
+  ],
+  "heroSpawn": [
+    212,
+    262
+  ],
+  "slimeSpawn": [
+    320,
+    250
+  ],
+  "heroSpeed": 160,
+  "slimeSpeed": 120,
+  "retargetSeconds": 0.2,
+  "startDelaySeconds": 0.8,
+  "collisionRadii": [
+    10,
+    12
+  ],
+  "clockText": "17:29",
+  "shiftEndText": "17:30",
+  "gameSecondsPerMinute": 60,
+  "exitBounds": [
+    520,
+    290,
+    548,
+    328
+  ],
+  "collisionCenterOffset": [
+    0,
+    -16
+  ],
+  "introWalkSteps": 4.5,
+  "introStepPixels": 40,
+  "slimeJumpSeconds": 0.6,
+  "slimeEntranceSeconds": 0.9,
+  "slimeJumpHeight": 68,
+  "slimeEntranceDistance": 72,
+  "exitDoorBounds": [
+    579,
+    243,
+    611,
+    313
+  ]
+}

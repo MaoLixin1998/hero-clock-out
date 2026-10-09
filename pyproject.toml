@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=70"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "hero-clock-out"
+version = "0.1.0"
+description = "A configurable two-dimensional chase game"
+requires-python = ">=3.10"
+dependencies = ["pygame-ce==2.5.8", "Pillow==12.3.0"]
+
+[project.scripts]
+hero-clock-out = "hero_game.app.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["hero_game", "hero_game.*"]
+
+[tool.setuptools.package-data]
+hero_game = ["data/game.json", "data/dialogue.json", "data/presentation.json"]
