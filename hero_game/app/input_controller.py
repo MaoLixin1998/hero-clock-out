@@ -28,6 +28,8 @@ class InputController:
         self.scale = scale
         # 控制器独占持续按键集合。
         self.held: set[int] = set()
+        # E的物理按下状态独立于方向集合，避免系统连发重复触发。
+        self._dash_key_down = False
 
     # 按事件顺序处理，返回继续运行标记和当帧冻结标记。
     def handle_events(self, events: Iterable[pygame.event.Event]) -> tuple[bool, bool]:
@@ -43,6 +45,8 @@ class InputController:
             if event.type in (pygame.WINDOWFOCUSLOST, pygame.WINDOWMINIMIZED):
                 # 防止回来后沿旧方向继续走。
                 self.held.clear()
+                # 失焦可能收不到松E事件，清除物理标记避免回来后第一下失效。
+                self._dash_key_down = False
                 # 胜负终态已经冻结，失焦只能清键，不能覆盖结果状态。
                 if not (self.model.caught or self.model.escaped):
                     # 正常游戏失焦时统一冻结角色和打字。
@@ -53,8 +57,20 @@ class InputController:
             elif event.type == pygame.KEYUP:
                 # 没有配对按下事件时也安全。
                 self.held.discard(event.key)
+                # 松开E才允许下一次新按下触发。
+                if event.key == pygame.K_e:
+                    # 恢复键沿检测，不改变正在执行的技能。
+                    self._dash_key_down = False
             # 按键由当前模型状态解释。
             elif event.type == pygame.KEYDOWN:
+                # 按住E或系统重复事件不能排队生成下一轮闪身。
+                if event.key == pygame.K_e and (self._dash_key_down or getattr(event, "repeat", False)):
+                    # 其他按键仍按原事件顺序处理。
+                    continue
+                # 任何阶段按下E都记录物理状态，不能从对白中带入连发。
+                if event.key == pygame.K_e:
+                    # 此标记只能由真实松键事件解除。
+                    self._dash_key_down = True
                 # 已有冻结请求不能被后面的移动键取消。
                 freeze_frame = self.handle_key(event.key) or freeze_frame
             # 左键只在活动对话中有作用。
@@ -152,6 +168,12 @@ class InputController:
             self.held.clear()
             # 状态切换当帧保持原位。
             return True
+        # 正常追逐中的E调用正式技能接口，不加入方向集合。
+        if key == pygame.K_e:
+            # 有方向键时沿输入，无方向时模型选择当前朝向。
+            self.model.request_dash(*self.direction())
+            # 技能请求不冻结双方的模拟时间。
+            return False
         # 普通追逐的按键集合归当前控制器拥有。
         self.held.add(key)
         # 普通输入不阻止模拟。

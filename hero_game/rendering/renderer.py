@@ -12,6 +12,8 @@ from hero_game.config import LOGICAL_SIZE, load_game_presentation, validate_game
 from hero_game.model.actor import Actor
 # 游戏模型提供只读展示状态。
 from hero_game.model.game import Game
+# 喘息次数属于模型技能规则，画面不能另增循环次数。
+from hero_game.model.dash_skill import BREATH_COUNT
 # 动态门只读取正式门框位置，不承担出口规则。
 from hero_game.rendering.door_renderer import DoorRenderer
 # 安全门外绘图独立于办公室的追逐画面。
@@ -135,6 +137,44 @@ class Renderer:
             frame = self.opening_poses[extra]
             # 按高度比同步换算脚底锚点，让脚底保持在原来的地面位置。
             ay = round(ay * frame.height / frames[index].height)
+        # 技能恢复采用同一朝向待机帧，脚底不动，上身明确起伏两次。
+        if actor.kind == "hero" and self.model.dash_phase == "recovering" and not (self.model.caught or self.model.escaped):
+            # 进度乘两轮；每轮半正弦平方从零抬升再回零，边界自然连续。
+            breath = math.sin(math.pi * BREATH_COUNT * self.model.dash_recovery_progress) ** 2
+            # 最大压低六个逻辑像素，让快速喘息区别于开场轻微呼吸。
+            height = frame.height - round(6 * breath)
+            # 缩放围绕脚底锚点，碰撞与地面位置不随上身变化。
+            ay = round(ay * height / frame.height)
+            # 复用完整原角色形象，保留耳机、闪电、工牌与键盘。
+            frame = pygame.transform.scale(frame, (frame.width, height))
+            # 两轮短气流配合身体起伏，帮助辨认喘息而非普通待机。
+            puff = pygame.Surface((24, 18), pygame.SRCALPHA)
+            # 气流随当前喘息强度出现和消失，不在恢复结束后残留。
+            color = (220, 238, 237, round(180 * breath))
+            # 小弧线逐渐向外扩张，保留像素角色的清晰轮廓。
+            radius = 3 + round(3 * breath)
+            # 两条轻弧线构成一次呼气，不写文字或对白。
+            pygame.draw.arc(puff, color, (2, 3, radius * 2, radius * 2), -0.7, 0.7, 2)
+            # 第二条较小的弧线增强气流辨识度。
+            pygame.draw.arc(puff, color, (10, 4, radius + 2, radius + 2), -0.7, 0.7, 2)
+            # 左朝向使用镜像气流，其他朝向放在头部前侧附近。
+            if actor.direction == "left":
+                # 独立画布翻转，不修改角色资源缓存。
+                puff = pygame.transform.flip(puff, True, False)
+            # 呼气靠近口鼻位置，脚底世界坐标始终不动。
+            self.surface.blit(puff, (x - 35 if actor.direction == "left" else x + 10, y - 35 + round(6 * breath)))
+        # 闪身绘制两个逐渐变淡的残影，真实角色仍只有一个。
+        if actor.kind == "hero" and self.model.dash_phase == "dashing" and not (self.model.caught or self.model.escaped):
+            # 残影按四向朝向后退，不参与世界碰撞或目标追击。
+            trail_dx, trail_dy = {"right": (-1, 0), "left": (1, 0), "down": (0, -1), "up": (0, 1)}[actor.direction]
+            # 两个距离和透明度让高速运动容易辨认。
+            for distance, alpha in ((18, 55), (9, 100)):
+                # 独立拷贝避免透明度污染原始动画缓存。
+                ghost = frame.copy()
+                # 较远的残影更淡，清楚露出史莱姆与场景。
+                ghost.set_alpha(alpha)
+                # 只在角色身后叠画，不移动角色的脚底坐标。
+                self.surface.blit(ghost, (x - ax + trail_dx * distance, y - ay + trail_dy * distance))
         # 登场中的史莱姆使用同一张透明帧做弹跳和压扁，世界坐标保持在勇者面前的落点。
         if actor.kind == "slime" and self.model.intro_phase == "entrance":
             # 读取跳跃时长，用它区分空中动作和落地回弹。
@@ -277,20 +317,6 @@ class Renderer:
     def draw_exit(self) -> None:
         # 当前模型只读提供门的通行状态与动作秒数。
         self.door_renderer.draw(self.surface, self.model.door_open_seconds, self.model.door_open)
-        # 演出与对白期间不在地面叠加操作指引。
-        if self.model.opening_active or self.model.dialogue.active or self.model.escaped:
-            # 原门始终可见，操作箭头只服务正常追逐。
-            return
-        # 门前触发区保持完整位于可走边界中。
-        left, top, right, bottom = self.model.exit_bounds
-        # 绘制准确入口，不把高处门板直接作为碰撞区。
-        threshold = pygame.Rect(round(left), round(top), round(right - left), round(bottom - top))
-        # 开放入口用绿色边线，关闭时保持低对比。
-        color = (126, 232, 160) if self.model.door_open else (122, 132, 115)
-        # 地面短连接线指向同一原门，不创建第二个出口。
-        pygame.draw.line(self.surface, color, threshold.midright, (self.door_renderer.rect.left, threshold.centery), 2)
-        # 原门前可达触发区让玩家知道该走到哪里。
-        pygame.draw.rect(self.surface, color, threshold, 2)
 
     # 正常追逐时给出逐秒剩余时间或开放后的门槛指引，文字来自正式配置。
     def draw_shift_instruction(self) -> None:
@@ -329,7 +355,7 @@ class Renderer:
         self.surface.fill((10, 22, 32))
         # 在画布左上角铺办公室背景，重新建立干净的场景。
         self.surface.blit(self.background, (0, 0))
-        # 墙门与地面门槛跟随模型状态，不能画进共享背景缓存。
+        # 原门动作跟随模型状态，通关判定区域不作为场景图形绘制。
         self.draw_exit()
         # 从素材配置取出时钟在场景中的左上角位置。
         x, y = self.resources.clock_position

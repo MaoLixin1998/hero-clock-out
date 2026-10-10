@@ -202,10 +202,12 @@ class RenderingChecks(unittest.TestCase):
                           [call.args[0] for call in labels.call_args_list])
         # 门从完整棕色门面变成开放通道，玩家可以直接辨认。
         self.assertNotEqual(closed, opened)
-        # 模型给出的可达门槛确实绘制出与墙上门口衔接的边线。
-        self.assertEqual(renderer.surface.get_at((round(model.exit_bounds[0]), round(model.exit_bounds[1]) + 5))[:3],
-                         # 绿色边线属于动态层，不在静态底图中。
-                         (126, 232, 160))
+        # 门前判定区域和原门之间保持场景底图，不露出辅助方框与连接线。
+        floor_area = pygame.Rect(515, 285, 61, 47)
+        # 比较完整区域而非单点，防止只去掉方框却残留横线。
+        self.assertEqual(pygame.image.tobytes(renderer.surface.subsurface(floor_area), "RGB"),
+                         # 此测试角色位于远处，区域内应只有未改写的原背景。
+                         pygame.image.tobytes(renderer.background.subsurface(floor_area), "RGB"))
         # 两次draw都没有修改共享背景，其他绘制器不会继承过期门状态。
         self.assertEqual(background, pygame.image.tobytes(renderer.background, "RGB"))
 

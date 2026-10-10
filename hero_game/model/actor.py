@@ -57,6 +57,53 @@ class Actor:
             # 不通过绝对值或默认值掩盖错误初态。
             raise ValueError("Actor phase must be nonnegative")
 
+    # 查询当前直线运动到下一条墙面的秒数，已贴住的轴不再产生零时长边界。
+    def seconds_until_wall(self, dx: float, dy: float, speed: float,
+                           # 活动边界与move采用相同的脚底坐标。
+                           bounds: Sequence[float]) -> float:
+        # 查询也校验方向与速率，不能返回非有限输入造成的错误边界。
+        horizontal = finite_number(dx, "dx")
+        # 纵轴同样以屏幕方向表示。
+        vertical = finite_number(dy, "dy")
+        # 非负速率表示每秒逻辑像素。
+        actual_speed = finite_number(speed, "speed")
+        # 负速率不属于正式运动契约。
+        if actual_speed < 0:
+            # 错误查询不修改角色位置。
+            raise ValueError("Movement speed must be nonnegative")
+        # 查询采用校验后的同一活动矩形。
+        left, top, right, bottom = movement_bounds(bounds)
+        # 先按最大轴缩小，防止极大有限分量的长度溢出。
+        maximum = max(abs(horizontal), abs(vertical))
+        # 零输入或零速率不会遇到新的墙面。
+        if maximum == 0 or actual_speed == 0:
+            # 无穷仅表示没有额外的切片上限。
+            return math.inf
+        # 缩放保留方向比例，再计算安全长度。
+        horizontal, vertical = horizontal / maximum, vertical / maximum
+        # 缩放后的向量不会溢出。
+        length = math.hypot(horizontal, vertical)
+        # 单位方向乘速率，得到两个轴的实际速度。
+        velocities = (horizontal / length * actual_speed, vertical / length * actual_speed)
+        # 默认没有即将遇到的墙面。
+        result = math.inf
+        # 两个轴分别检查下一次夹紧时刻。
+        for position, low, high, velocity in ((self.x, left, right, velocities[0]),
+                                              # 纵轴采用同样规则。
+                                              (self.y, top, bottom, velocities[1])):
+            # 静止轴不存在新的墙面事件。
+            if velocity == 0:
+                # 继续查询另一轴。
+                continue
+            # 向正方向取高边界，负方向取低边界。
+            distance = (high - position) if velocity > 0 else (position - low)
+            # 已贴墙的轴已经由move夹紧，不重复制造零时间切片。
+            if distance > MOVEMENT_EPSILON_PIXELS:
+                # 最早墙面处必须拆段，以免把整段夹紧轨迹错误地当成匀速运动。
+                result = min(result, distance / abs(velocity))
+        # 只读查询不改变位置、朝向或行走相位。
+        return result
+
     # 按方向、每秒速率和帧时长推进位置，斜向输入先归一化再夹紧活动边界。
     # dt 为非负秒数、speed 为非负逻辑像素/秒；非法数值或边界抛出 ValueError。
     def move(

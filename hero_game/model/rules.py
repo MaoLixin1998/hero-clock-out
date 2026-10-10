@@ -25,7 +25,9 @@ POSITIVE_FIELDS = ("heroSpeed", "slimeSpeed", "retargetSeconds", "introWalkSteps
                    # 高度和间距决定可见动作与独立落点。
                    "slimeJumpHeight", "slimeEntranceDistance",
                    # 一个游戏分钟对应的有效模拟秒数，默认按真实60秒推进。
-                   "gameSecondsPerMinute")
+                   "gameSecondsPerMinute",
+                   # 闪身距离与运动、恢复时长属于正式技能规则。
+                   "dashDistance", "dashSeconds", "dashRecoverySeconds")
 # 反应周期至少一微秒，比模拟的1e-9秒浮点容差大1000倍，保证时间切片前进。
 MIN_RETARGET_SECONDS = 1e-6
 # 钟面按24小时循环，跨午夜的下班时间仍能向前计算。
@@ -92,6 +94,12 @@ def validate_game_rules(rules: Mapping[str, Any]) -> dict[str, Any]:
     if not (left <= exit_left < exit_right <= right and top <= exit_top < exit_bottom <= bottom):
         # 不通过放宽碰撞或移动边界掩盖无法到达的出口。
         raise ValueError("exitBounds must have positive area inside movement bounds")
+    # 技能阶段不能短于时间切片的可靠精度。
+    for field in ("dashSeconds", "dashRecoverySeconds"):
+        # 拒绝过小秒数，避免阶段边界产生零时间循环。
+        if finite_number(actual[field], field) < MIN_RETARGET_SECONDS:
+            # 错误字段由配置入口明确报告。
+            raise ValueError(f"{field} must be at least one microsecond")
     # 两个正式出生点均按相同边界验证。
     for field in ("heroSpawn", "slimeSpawn"):
         # 读取已经检查过维度与类型的二维点。

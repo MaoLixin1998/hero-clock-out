@@ -49,5 +49,8 @@
     243,
     611,
     313
-  ]
+  ],
+  "dashDistance": 128,
+  "dashSeconds": 0.2,
+  "dashRecoverySeconds": 0.8
 }

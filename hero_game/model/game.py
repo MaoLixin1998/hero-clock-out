@@ -11,6 +11,8 @@ from typing import Any
 from hero_game.model.actor import Actor
 # 连续接触与门槛检测提供首次进入比例，用真实先后顺序决定结果。
 from hero_game.model.collision import capture_contact_fraction, rectangle_entry_fraction
+# 技能组件独占闪身与恢复阶段，不直接移动角色。
+from hero_game.model.dash_skill import DashSkill
 # 对话播放器独占正文与逐字状态，不控制追逐。
 from hero_game.model.dialogue import Dialogue
 # 成功后的跨门与门外行走由独立组件持有，不恢复追逐。
@@ -109,6 +111,8 @@ class Game:
         self.escaped = False
         # 新局不继承旧结局轨迹或门外停留时间。
         self._ending = EndingSequence()
+        # 每局创建独立技能，重开不会残留闪身或喘息。
+        self._dash = DashSkill(self._rules["dashDistance"], self._rules["dashSeconds"], self._rules["dashRecoverySeconds"])
         # 本局有效追逐秒数归零，开场、对话与暂停不计入此时间。
         self.elapsed = 0.0
         # 恢复完整起跑缓冲，给玩家保留先移动的机会。
@@ -121,6 +125,37 @@ class Game:
         self._opening = OpeningSequence(self._rules, play_intro)
         # 清除上一段尚未结束的正文，但保留对话配置供新事件使用。
         self.dialogue.skip()
+
+    # 请求闪身；有方向输入时沿输入，否则沿当前朝向，只在正常追逐时接受。
+    def request_dash(self, dx: float = 0.0, dy: float = 0.0) -> bool:
+        # 校验横向输入，冻结状态也不能隐藏非法数值。
+        horizontal = finite_number(dx, "dash.dx")
+        # 纵向输入同样保持有限数值契约。
+        vertical = finite_number(dy, "dash.dy")
+        # 开场、对白、暂停和胜负终态都不能触发技能。
+        if self.paused or self.opening_active or self.dialogue.active or self.caught or self.escaped:
+            # 拒绝请求不会改变当前世界或技能计时。
+            return False
+        # 没有方向键时使用上次的四向朝向。
+        if horizontal == 0 and vertical == 0:
+            # 朝向是Actor已校验的稳定编号，不由图片决定运动。
+            horizontal, vertical = {"left": (-1.0, 0.0), "right": (1.0, 0.0),
+                                    # 屏幕纵坐标向下为正。
+                                    "up": (0.0, -1.0), "down": (0.0, 1.0)}[self.hero.direction]
+        # 技能自行拒绝闪身或喘息期间的重复请求。
+        return self._dash.start(horizontal, vertical)
+
+    # 提供技能只读阶段，输入与绘制共用这一事实。
+    @property
+    def dash_phase(self) -> str:
+        # 技能组件是阶段的唯一状态来源。
+        return self._dash.phase
+
+    # 提供喘息归一化进度，绘制不能自行推进动作。
+    @property
+    def dash_recovery_progress(self) -> float:
+        # 暂停时此值也随模型计时一起冻结。
+        return self._dash.recovery_progress
 
     # 把按当前位置选择面前落点委托给正式开场组件，保留旧调用接口。
     # 只改变落点和双方朝向，不移动勇者身体或启动追逐。
@@ -208,6 +243,16 @@ class Game:
             if not self.door_open:
                 # 当前段至多消耗完剩余上班时间。
                 step_seconds = min(step_seconds, self.remaining_shift_seconds)
+            # 技能阶段边界也拆分世界，喘息开始和结束时不会多走一帧。
+            step_seconds = min(step_seconds, self._dash.seconds_until_boundary)
+            # 当前段统一取得实际方向与速率，候选和提交保持一致。
+            hero_dx, hero_dy, hero_speed = self._dash.motion(dx, dy, self._rules["heroSpeed"])
+            # 到墙时实际速度改变，先拆段再做连续接触，避免高速贴墙轨迹被拉慢。
+            step_seconds = min(step_seconds, self.hero.seconds_until_wall(hero_dx, hero_dy, hero_speed, self._bounds))
+            # 敌人也可能先到某一轴的墙面，双方共同使用最早的运动边界。
+            if not is_waiting:
+                # 只读查询不会改变当前追逐目标或敌人方向。
+                step_seconds = min(step_seconds, self.slime.seconds_until_wall(*self.chase_direction, self._rules["slimeSpeed"], self._bounds))
             # 试算只操作独立的纯角色副本，不把尚未确定的整段移动写入本局。
             hero_end, slime_end = copy(self.hero), copy(self.slime)
             # 保留真实起点，供连续门槛检测和相对接触计算使用。
@@ -215,7 +260,7 @@ class Game:
             # 相对起点中共同的碰撞中心偏移会抵消。
             before = (self.hero.x - self.slime.x, self.hero.y - self.slime.y)
             # 候选终点遵守与正式移动相同的归一化和墙面边界。
-            hero_end.move(dx, dy, step_seconds, self._rules["heroSpeed"], self._bounds)
+            hero_end.move(hero_dx, hero_dy, step_seconds, hero_speed, self._bounds)
             # 缓冲期间敌人保持零速，其他时间沿已保存的目标方向前进。
             slime_direction = (0.0, 0.0) if is_waiting else self.chase_direction
             # 单次候选推进只为查询本段最早事件，不修改原角色。
@@ -239,7 +284,13 @@ class Game:
             # 比例为零也是有效事件，不能用真假判断把它替换成完整段。
             processed_seconds = step_seconds * (1.0 if event_fraction is None else event_fraction)
             # 正式角色只提交确定处理的时间，不越过已经发生的结果。
-            self.hero.move(dx, dy, processed_seconds, self._rules["heroSpeed"], self._bounds)
+            self.hero.move(hero_dx, hero_dy, processed_seconds, hero_speed, self._bounds)
+            # 技能与双方角色消耗同一段有效秒数，被抓或离开后不再继续。
+            self._dash.advance(processed_seconds)
+            # 闪身结束的精确边界立即切成待机，不等下一帧才停止动画。
+            if self._dash.phase == "recovering":
+                # 只清除行走表现，脚底坐标仍是本段真实终点。
+                self.hero.move(0.0, 0.0, 0.0, 0.0, self._bounds)
             # 敌人也推进到同一事件时刻，终态以后不会继续追击。
             self.slime.move(*slime_direction, processed_seconds, 0.0 if is_waiting else self._rules["slimeSpeed"], self._bounds)
             # 起跑等待和反应倒计时只扣除实际发生的秒数。
