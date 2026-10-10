@@ -4,11 +4,11 @@
 
 ## 开发规则
 
-- 本机开发先读取`~/.codex/standards/general-coding-standard.md`（通用规范1.6）或同版本本机副本；正文仅本机配置，不随Git或发行物分发。项目约定见[Python / pygame补充1.3](support/standards/python-pygame.md)及[项目协作入口](AGENTS.md)。
+- 开发先读取[通用规范1.6.1](support/standards/general-coding-standard.md)；本机配置了权威规范时，核对同版本正文后使用。项目副本为已审阅的纯技术内容，不会自动改写其他电脑的配置。项目约定见[Python / pygame补充1.4](support/standards/python-pygame.md)及[项目协作入口](AGENTS.md)。
 - 首次实现、接手项目或改变结构前，按R02在对话展示分层图、包结构树与边界；当前结构见[架构与边界](support/technical/architecture.md)，结构不变的局部修改可引用有效图。
 - 一个类一个文件，中文说明写在定义与逻辑代码正上方；模型、资源、绘图、输入与生命周期按职责分离。
 - 正式游戏剧情与界面文字是包内数据，可随游戏提交；视频拍摄代码优先使用独立本机测试场景，不侵入主体、不参与默认测试、Git与发行。
-- 项目辅助内容统一在`support/`内分类。可发布技术文档在`support/technical/`，项目专用补充为`support/standards/python-pygame.md`；通用规范本机副本在`support/standards/general-coding-standard.md`并排除Git。混合旧稿、视频文档、素材及旧配置集中于`support/production/`，全部保留本机。
+- 项目辅助内容统一在`support/`内分类。可发布技术文档在`support/technical/`，项目专用补充为`support/standards/python-pygame.md`；已审阅的通用规范副本位于`support/standards/general-coding-standard.md`并随技术源码提供。混合旧稿、视频文档、素材及旧配置集中于`support/production/`，全部保留本机。
 
 ## 安装与启动
 
@@ -25,7 +25,7 @@ python main.py
 
 WASD/方向键移动，E沿当前方向闪身（无方向输入时沿朝向），闪身后原地喘息两次再恢复移动，空格/Esc暂停或恢复，对话中回车/空格补全与推进，Tab/Esc跳过，被抓或下班成功后R重开，Q退出。
 
-默认从17:29开始，累计60秒有效游戏时间后到17:30，右上方的门开放。钟面下方显示剩余秒数；门前绿色门槛是实际可达的出口，开门后走入即可下班。开场、对白、暂停和胜负终态冻结计时；起跑保护期间玩家可动，时间正常推进。失败或成功后重开会恢复17:29和关闭的门。
+默认从17:29开始，累计60秒有效游戏时间后到17:30，右下方的门开放。钟面下方显示剩余秒数；进入开放门前的逻辑触发区即可下班，触发区不绘制辅助方框或连接线。开场、对白、暂停和胜负终态冻结计时；起跑保护期间玩家可动，时间正常推进。失败或成功后重开会恢复17:29和关闭的门。
 
 正式规则位于`hero_game/data/game.json`：`clockText`为开始钟面，`shiftEndText`为下班钟面，`gameSecondsPerMinute`为一个游戏分钟对应的有效秒数，`exitBounds`为脚底可进入的左、上、右、下边界。时间可跨午夜；钟面到下班时封顶，门保持开放直到结果或重开。碰撞与进入门槛按一段移动中首次发生的时间比较，同刻被抓优先。
 

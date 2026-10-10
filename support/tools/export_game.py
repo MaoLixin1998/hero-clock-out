@@ -139,7 +139,7 @@ def build_wheel(destination: Path | None = None, root: Path = ROOT, staged: bool
         source_directory = temporary_root / "source"
         # 构建输出也在临时区。
         wheel_directory = temporary_root / "wheel"
-        # 不带support/production、本机规范或任何旧稿与媒体。
+        # 只带已审阅技术快照，不带本机制作、混合规则、旧稿或媒体。
         write_snapshot(source_directory, entries)
         # 显式创建wheel输出目录。
         wheel_directory.mkdir()

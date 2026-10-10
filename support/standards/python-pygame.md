@@ -1,6 +1,6 @@
 # Python / pygame项目规范补充
 
-版本：1.3。日期：2026-10-07。通用基线：本机通用开发规范1.6，权威正文为`~/.codex/standards/general-coding-standard.md`；同版本本机副本位于本目录但不随Git分发。适用范围：本项目Python源码、测试、运行配置、构建与检查脚本。
+版本：1.4。日期：2026-10-10。通用基线：[通用开发规范1.6.1](general-coding-standard.md)，项目副本经正文审阅随技术源码提供；本机权威正文采用同版本规范，不由仓库自动改写。适用范围：本项目Python源码、测试、运行配置、构建与检查脚本。
 
 本补充只规定当前Python / pygame项目的目录、命名、接口和验证方式；不采用vibe-pet的AppKit生命周期、PyObjC选择器或其他项目专用hook。新任务先读取实际协作入口与上述通用规范，工具的覆盖范围不能替代人工审阅。
 
@@ -33,13 +33,13 @@ Python使用UTF-8、4个空格缩进和文件末尾换行。标准库、第三�
 | 分类 | 实际路径 | 公开边界与依赖 |
 | --- | --- | --- |
 | 入口与应用组装 | `main.py`、`hero_game/__main__.py`、`hero_game/app/cli.py`、`application.py`、`game_factory.py` | 通过`main()`、`run_game()`、`create_game()`和`Application.run()`解析参数、创建依赖、运行循环并清理；应用工厂读取缺省配置后显式注入模型，其他层不反向导入入口或工厂 |
-| 业务领域与用例 | `hero_game/model/` | `Game`显式接收规则与对白，组合`Actor`、`OpeningSequence`与`Dialogue`；`rules.py`提供纯规则校验与所属常量；公开更新、重置、推进与查询接口处理规则状态，不依赖配置文件读取、pygame、应用、渲染或本机制作内容 |
+| 业务领域与用例 | `hero_game/model/` | `Game`显式接收规则与对白，组合`Actor`、`OpeningSequence`、`Dialogue`、`DashSkill`与`EndingSequence`；`rules.py`提供纯规则校验与所属常量；公开更新、重置、推进与查询接口处理规则状态，不依赖配置文件读取、pygame、应用、渲染或本机制作内容 |
 | 正式配置读取 | `hero_game/config.py` | `load_game_rules()`、`load_game_dialogue()`、`load_game_presentation()`读取包内正式JSON，并复用模型纯校验、保留原校验接口兼容；作为应用侧数据供应，不被模型反向导入 |
 | 外部资源适配 | `hero_game/rendering/local_resources.py`、`generated_resources.py`、`resource_bundle.py`，以及`hero_game/app/audio.py` | 资源工厂返回`ResourceBundle`，声音适配器通过`start()`、`update()`消费事件编号；负责资源边界和缓存，不决定业务规则 |
 | 界面与交互 | `hero_game/rendering/renderer.py`、`hero_game/app/input_controller.py` | `Renderer.draw()`读取状态与资源；`InputController`处理输入并调用模型公开能力，不访问其他模块下划线私有字段；允许依赖pygame、模型与已准备资源 |
 | 配置与运行数据 | `hero_game/data/` | 正式规则、对白与显示文字的唯一默认来源，通过配置接口读取并随Python包分发；不保存拍摄分镜与时间码 |
 | 正式验证与构建 | `support/tests/`、`support/tools/`、`pyproject.toml` | 正式回归、只读索引检查、资源技术工具与发行允许清单；工具可依赖正式接口，运行包不反向依赖测试或构建工具 |
-| 技术文档 | `support/standards/`、`support/technical/`、`TECHNICAL.md` | 保存项目专用补充、接口、架构、构建与验证信息；审阅后可进入Git。通用规范正文及本机副本始终排除，不保存拍摄剧情 |
+| 技术文档 | `support/standards/`、`support/technical/`、`TECHNICAL.md` | 保存项目专用补充、接口、架构、构建与验证信息；纯技术通用规范、项目补充和技术文档逐份审阅后可进入Git；混合规则与拍摄剧情排除 |
 | 本机拍摄场景 | `support/tests/local_video/` | 仅显式单独运行，通过公开接口组合主体能力；不进入Git、默认测试发现、CI或正式发行包 |
 | 生成产物与本机制作内容 | `support/tools/output/`、临时构建目录、`*.egg-info/`、缓存，以及`support/production/`、原`support/production/docs/`、`support/production/game_assets/` | 构建产物与制作素材分别忽略；主体运行不依赖它们，不将本机制作内容混入发行包 |
 

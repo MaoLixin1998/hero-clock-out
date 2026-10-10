@@ -19,14 +19,14 @@ if __package__ in {None, ""}:
 # 复用只读Git调用，避免不同工具形成不同的索引读取方式。
 from support.tools.check_code_conventions import run_git
 
-# 根文件逐项允许，AGENTS仅保存纯技术入口，混合README和本机拍摄入口排除。
-ROOT_FILES = frozenset({".gitignore", ".gitattributes", "TECHNICAL.md", "AGENTS.md", "requirements.txt", "pyproject.toml", "main.py", "dialogue.py"})
+# 根文件逐项允许，README与AGENTS只保存技术入口，本机混合版本留在排除目录。
+ROOT_FILES = frozenset({".gitignore", ".gitattributes", "README.md", "TECHNICAL.md", "AGENTS.md", "requirements.txt", "pyproject.toml", "main.py", "dialogue.py"})
 # 技术工具逐项审阅，本机素材生成脚本保持排除。
 TOOL_FILES = frozenset({"__init__.py", "build_audio.py", "build_dialogue_ui.py", "split_gif.py", "export_game.py", "check_code_conventions.py", "check_git_scope.py", "check_project.py"})
 # 只有这三份正式配置属于可发布游戏内容，视频覆盖配置放在本机目录。
 DATA_FILES = frozenset({"game.json", "dialogue.json", "presentation.json"})
-# 仅项目专用补充和纯技术文档使用精确路径；通用规范正文仅保留本机。
-DOCUMENT_FILES = frozenset({"support/standards/python-pygame.md", "support/technical/architecture.md", "support/technical/packaging.md"})
+# 经正文审阅的通用规范、项目补充和纯技术文档逐份登记，不递归放行辅助目录。
+DOCUMENT_FILES = frozenset({"support/standards/general-coding-standard.md", "support/standards/python-pygame.md", "support/technical/architecture.md", "support/technical/packaging.md"})
 # Python模块名采用英文标识符，阻止异常路径、隐藏目录和媒体混入。
 MODULE_PART_PATTERN = re.compile(r"[a-z][a-z0-9_]*\Z")
 
@@ -59,7 +59,7 @@ def is_allowed_path(path: str) -> bool:
     if relative.parts[0] == "hero_game" and relative.suffix == ".py":
         # 每层目录必须采用模块命名，末尾允许Python约定的包入口。
         return all(MODULE_PART_PATTERN.fullmatch(part) for part in relative.parts[1:-1]) and (relative.name in {"__init__.py", "__main__.py"} or bool(MODULE_PART_PATTERN.fullmatch(relative.stem)))
-    # support/production、通用规范正文、构建产物和陌生路径默认拒绝。
+    # 本机制作、混合规则、构建产物和未登记路径默认拒绝。
     return False
 
 

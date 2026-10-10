@@ -16,14 +16,14 @@ class GitScopeChecks(unittest.TestCase):
     # 正式游戏包内配置与纯技术文档均在允许范围。
     def test_formal_game_and_technical_paths_are_allowed(self) -> None:
         # 逐个覆盖根入口、职责模块、正式配置和项目专用补充。
-        for path in ("main.py", "AGENTS.md", "hero_game/__main__.py", "hero_game/models/game.py", "hero_game/data/dialogue.json", "support/standards/python-pygame.md", "support/technical/packaging.md", "support/tools/check_project.py"):
+        for path in ("main.py", "README.md", "AGENTS.md", "hero_game/__main__.py", "hero_game/model/game.py", "hero_game/data/dialogue.json", "support/standards/general-coding-standard.md", "support/standards/python-pygame.md", "support/technical/packaging.md", "support/tools/check_project.py"):
             # 正式路径应由同一策略放行。
             self.assertTrue(is_allowed_path(path), path)
 
     # 视频制作内容不能凭文件类型混入正式包。
     def test_local_video_and_unknown_paths_are_rejected(self) -> None:
         # 样例均为受控字符串，不涉及真实台词或素材。
-        for path in ("", "README.md", "support/tests/local_video/shot.py", "config/dialogue.json", "support/production/runtime/dialogue.json", "hero_game/data/dialogue.local.json", "assets/hero.png", "support/tools/build_assets.py", "support/tools/unknown.py", "hero_game/../private.py", "/main.py", "hero_game\\private.py", "docs/script.md", "support/standards/general-coding-standard.md"):
+        for path in ("", "AGENTS.override.md", "support/production/notes/README.md", "support/tests/local_video/shot.py", "config/dialogue.json", "support/production/runtime/dialogue.json", "hero_game/data/dialogue.local.json", "assets/hero.png", "support/tools/build_assets.py", "support/tools/unknown.py", "hero_game/../private.py", "/main.py", "hero_game\\private.py", "docs/script.md", "support/standards/local-collaboration.md"):
             # 默认拒绝范围之外的路径。
             self.assertFalse(is_allowed_path(path), path)
 

@@ -23,6 +23,7 @@
 !/.gitattributes
 !/.gitignore
 !/AGENTS.md
+!/README.md
 !/TECHNICAL.md
 !/dialogue.py
 !/hero_game/__init__.py
@@ -40,12 +41,16 @@
 !/hero_game/model/__init__.py
 !/hero_game/model/actor.py
 !/hero_game/model/collision.py
+!/hero_game/model/dash_skill.py
 !/hero_game/model/dialogue.py
+!/hero_game/model/ending_sequence.py
 !/hero_game/model/game.py
 !/hero_game/model/numeric.py
 !/hero_game/model/opening_sequence.py
 !/hero_game/model/rules.py
 !/hero_game/rendering/__init__.py
+!/hero_game/rendering/door_renderer.py
+!/hero_game/rendering/ending_renderer.py
 !/hero_game/rendering/generated_resources.py
 !/hero_game/rendering/local_resources.py
 !/hero_game/rendering/renderer.py
@@ -54,6 +59,7 @@
 !/pyproject.toml
 !/requirements.txt
 !/support/standards/python-pygame.md
+!/support/standards/general-coding-standard.md
 !/support/technical/architecture.md
 !/support/technical/packaging.md
 !/support/tests/test_actor.py
@@ -62,8 +68,10 @@
 !/support/tests/test_code_conventions.py
 !/support/tests/test_collision.py
 !/support/tests/test_configuration.py
+!/support/tests/test_dash.py
 !/support/tests/test_dialogue.py
 !/support/tests/test_dialogue_player.py
+!/support/tests/test_ending.py
 !/support/tests/test_export.py
 !/support/tests/test_game_opening.py
 !/support/tests/test_generated_resources.py
@@ -84,10 +92,9 @@
 !/support/tools/export_game.py
 !/support/tools/split_gif.py
 
-# 制作资料、本机拍摄场景、通用规范和生成产物保持本机。
+# 制作资料、本机拍摄场景和生成产物保持本机；技术规范仅按上述精确路径允许。
 /support/production/
 /support/tests/local_video/
-/support/standards/general-coding-standard.md
 /support/tools/output/
 # 系统临时文件与解释器缓存始终排除。
 **/__pycache__/

@@ -50,7 +50,7 @@ hero-clock-out/
     │   └── local_video/             本机场景，排除Git与发行
     ├── tools/                       正式检查与构建代码包
     │   └── output/                  生成产物，排除Git
-    ├── standards/                   项目补充可审阅发布，通用正文仅本机
+    ├── standards/                   已审通用规范副本与项目补充
     ├── technical/                   可审阅发布的技术文档
     └── production/                  本机制作资料，全部排除Git与发行
         ├── docs/                    视频主稿与分镜

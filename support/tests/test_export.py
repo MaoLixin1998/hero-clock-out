@@ -37,7 +37,9 @@ class ExportChecks(unittest.TestCase):
                 "hero_game/data/presentation.json",
                 # 已审阅的构建工具可以随源码包交付。
                 "support/tools/export_game.py",
-                # 项目专用补充可以分发，但不是通用规范正文副本。
+                # 纯技术通用规范与项目补充分别审阅、分别允许。
+                "support/standards/general-coding-standard.md",
+                # 当前语言与框架的实际约定随源码分发。
                 "support/standards/python-pygame.md",
             )
             # 每个路径使用普通文本，不读取外部真实文件。
@@ -52,8 +54,8 @@ class ExportChecks(unittest.TestCase):
             excluded_paths = (
                 # 个人资源关联入口不属于技术代码。
                 "LIFE_PLAN_LINK.md",
-                # 原README混合创作内容，不能默认打包。
-                "README.md",
+                # 制作区的混合README不能因同名而默认打包。
+                "support/production/notes/README.md",
                 # 根配置不能成为另一套默认规则来源。
                 "config/game.json",
                 # 本机视频台词保持隔离。
@@ -72,8 +74,8 @@ class ExportChecks(unittest.TestCase):
                 "support/tools/build_assets.py",
                 # 陌生工具要先审阅，不能只凭.py放行。
                 "support/tools/unknown.py",
-                # 本机通用开发规范不因Markdown后缀或技术目录而获准分发。
-                "support/standards/general-coding-standard.md",
+                # 未登记的本机混合规则不能因技术目录而获准分发。
+                "support/standards/local-collaboration.md",
             )
             # 写入明确私有标记，检查器只需筛路径而不解释正文。
             for relative in excluded_paths:
@@ -87,8 +89,8 @@ class ExportChecks(unittest.TestCase):
             selected = {path.as_posix() for path in public_files(root)}
             # 确认完整保留正式技术和游戏数据。
             self.assertEqual(selected, set(allowed_paths))
-            # 排除发行不会删除本机规范文件或改写其正文。
-            self.assertEqual((root / "support/standards/general-coding-standard.md").read_bytes(), b"private")
+            # 排除发行不会删除本机混合规则文件或改写其正文。
+            self.assertEqual((root / "support/standards/local-collaboration.md").read_bytes(), b"private")
 
     # 构建失败不能覆盖已经存在的可用压缩包。
     def test_missing_required_files_preserve_existing_artifact(self) -> None:
@@ -146,7 +148,9 @@ class ExportChecks(unittest.TestCase):
                 "hero_game/data/game.json", "hero_game/data/dialogue.json",
                 # 界面文字不从本机覆盖文件补齐。
                 "hero_game/data/presentation.json",
-                # 只有项目专用补充进入正式技术交付。
+                # 已审通用规范与项目专用补充都属于技术交付。
+                "support/standards/general-coding-standard.md",
+                # 语言与框架补充保持独立来源。
                 "support/standards/python-pygame.md",
             }
             # 为每份文件写入可校验且无副作用的技术样例。
@@ -163,8 +167,8 @@ class ExportChecks(unittest.TestCase):
             private_path.parent.mkdir()
             # 隔离测试标记不包含真实个人资料。
             private_path.write_text("private\n", encoding="utf-8")
-            # 在同一技术目录放本机规范，实测ZIP不收集它。
-            local_standard = root / "support/standards/general-coding-standard.md"
+            # 在同一技术目录放未登记混合规则，实测ZIP不收集它。
+            local_standard = root / "support/standards/local-collaboration.md"
             # 只使用受控标记，不复制真实通用规则正文。
             local_standard.write_bytes(b"local-only general rules\n")
             # 目标放在项目外，避免本次产物参与自己的清单筛选。
@@ -179,8 +183,10 @@ class ExportChecks(unittest.TestCase):
             with ZipFile(archive_path) as archive:
                 # 容器成员应精确等于正式源码快照。
                 self.assertEqual(set(archive.namelist()), expected_paths)
-                # 本机通用规范必须从实际容器成员中排除。
-                self.assertNotIn("support/standards/general-coding-standard.md", archive.namelist())
+                # 本机混合规则必须从实际容器成员中排除。
+                self.assertNotIn("support/standards/local-collaboration.md", archive.namelist())
+                # 已审通用规范的真实字节应完整保留在源码包中。
+                self.assertEqual(archive.read("support/standards/general-coding-standard.md"), "# 受控技术样例。\n".encode("utf-8"))
                 # CRC必须完整，压缩过程没有损坏任何文件。
                 self.assertIsNone(archive.testzip())
                 # 正式数据实际保存了源字节，不只是一个占位成员名。

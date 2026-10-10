@@ -21,7 +21,7 @@ python -m pip wheel . --no-deps --no-build-isolation --wheel-dir support/tools/o
 
 默认产物集中在`support/tools/output/`并排除Git。源码ZIP由正式白名单快照生成，保留源码、正式数据、检查与技术文档；解压后安装依赖即可运行`python main.py`。wheel提供可安装包、三份正式JSON及console入口。构建后端为setuptools>=70；需要使用已安装该后端的解释器，常规pip构建隔离可能安装构建依赖。
 
-两种产物均排除通用开发规范正文及项目副本、视频测试场景、制作文档、原混合README、本机配置、旧美术目录、个人头像、配乐和录屏。源码打包与wheel构建在临时目录中完成，校验成功后原子替换目标，失败保留旧产物；不把整个工作区递归压缩。wheel是Python安装包，尚未提供包含解释器的原生.app或Windows可执行程序。
+两种产物均排除本机混合规则、视频测试场景、制作文档、原混合README、本机配置、旧美术目录、个人头像、配乐和录屏。源码ZIP可包含已审通用规范与项目补充；wheel只分发运行包与正式数据，不带辅助目录。源码打包与wheel构建在临时目录中完成，校验成功后原子替换目标，失败保留旧产物；不把整个工作区递归压缩。wheel是Python安装包，尚未提供包含解释器的原生.app或Windows可执行程序。
 
 ## 检查范围
 
@@ -36,4 +36,4 @@ python -m support.tools.check_git_scope --staged --history
 
 包验收从白名单生成干净快照，在无本机素材与制作目录的临时目录启动源码；再构建wheel，使用`--no-index --no-deps`离线安装到全新目录，运行实际console和`python -m hero_game`模块入口。无显示启动命令为`--headless --frames 3 --silent`，实际执行绘制和清理流程。每次报告区分工作区、索引、安装包和真实GUI，不把虚拟驱动或自动测试等同于人工画面与听感验收。
 
-正式Git数据是`hero_game/data/{game,dialogue,presentation}.json`。旧根配置已归档至`support/production/legacy_config/`，不继续作为配置来源。可发布纯技术文档位于`support/technical/`、项目专用补充`support/standards/python-pygame.md`及根技术入口；本机`support/standards/general-coding-standard.md`不进入Git和发行包，缺少它不影响干净代码运行、检查或打包。视频与制作文档集中在`support/production/`。新增技术文件仍要审阅正文并同步允许清单，不因为后缀为.py、.json或.md而自动准许上传。
+正式Git数据是`hero_game/data/{game,dialogue,presentation}.json`。旧根配置已归档至`support/production/legacy_config/`，不继续作为配置来源。可发布纯技术文档位于`support/technical/`、项目专用补充`support/standards/python-pygame.md`及根技术入口；已审阅的`support/standards/general-coding-standard.md`随技术源码提供，与权威版本1.6.1保持一致；它不是运行依赖，缺少它不影响游戏启动。视频与制作文档集中在`support/production/`。新增技术文件仍要审阅正文并同步允许清单，不因为后缀为.py、.json或.md而自动准许上传。

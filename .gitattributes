@@ -1,7 +1,7 @@
 # Git内容由精确白名单与范围检查限制，archive排除规则作为额外防线。
 /support/production export-ignore
 /support/tests/local_video export-ignore
-/support/standards/general-coding-standard.md export-ignore
+/AGENTS.override.md export-ignore
 /support/tools/build_assets.py export-ignore
 /support/tools/output export-ignore
 /.idea export-ignore
