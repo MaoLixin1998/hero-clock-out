@@ -4,8 +4,9 @@
 
 ## 开发规则
 
-- 开发先读取[通用规范1.6.1](support/standards/general-coding-standard.md)；本机配置了权威规范时，核对同版本正文后使用。项目副本为已审阅的纯技术内容，不会自动改写其他电脑的配置。项目约定见[Python / pygame补充1.4](support/standards/python-pygame.md)及[项目协作入口](AGENTS.md)。
+- 开发先读取[通用规范1.7](support/standards/general-coding-standard.md)；本机配置了权威规范时，核对同版本正文后使用。项目副本为已审阅的纯技术内容，不会自动改写其他电脑的配置。项目约定见[Python / pygame补充1.5](support/standards/python-pygame.md)及[项目协作入口](AGENTS.md)。
 - 首次实现、接手项目或改变结构前，按R02在对话展示分层图、包结构树与边界；当前结构见[架构与边界](support/technical/architecture.md)，结构不变的局部修改可引用有效图。
+- 按R03围绕明确功能与职责控制变更范围，先说明目标、必要文件和验证；大需求按依赖连续拆批，避免无关功能和顺手重构，保留必要的接口、测试、配置、文档及允许清单同步。范围与拆批合理性由人工审阅，已有实施授权不因拆批增加逐次审批。
 - 一个类一个文件，中文说明写在定义与逻辑代码正上方；模型、资源、绘图、输入与生命周期按职责分离。
 - 正式游戏剧情与界面文字是包内数据，可随游戏提交；视频拍摄代码优先使用独立本机测试场景，不侵入主体、不参与默认测试、Git与发行。
 - 项目辅助内容统一在`support/`内分类。可发布技术文档在`support/technical/`，项目专用补充为`support/standards/python-pygame.md`；已审阅的通用规范副本位于`support/standards/general-coding-standard.md`并随技术源码提供。混合旧稿、视频文档、素材及旧配置集中于`support/production/`，全部保留本机。

@@ -334,6 +334,10 @@ class Renderer:
             text = self.presentation[f"doorOpenInstruction{suffix}"]
         # 门尚未开放时按向上取整显示剩余整数秒。
         else:
+            # 闪身和两次喘息期间不画秒数，这段画面只留钟面。
+            if self.model.dash_phase in ("dashing", "recovering"):
+                # 技能结束后追逐提示会回来，正式倒计时仍在。
+                return
             # 正数余量始终至少显示 1 秒，避免未开门时提前出现零。
             seconds = math.ceil(self.model.remaining_shift_seconds)
             # 模板已经在配置边界确认只有 seconds 变量。

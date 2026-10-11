@@ -52,5 +52,5 @@
   ],
   "dashDistance": 128,
   "dashSeconds": 0.2,
-  "dashRecoverySeconds": 0.8
+  "dashRecoverySeconds": 0.4
 }

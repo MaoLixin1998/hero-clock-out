@@ -1,8 +1,10 @@
 # 项目开发协作入口
 
-开发前实际读取 [通用开发规范1.6.1](support/standards/general-coding-standard.md)和 [Python / pygame补充1.4](support/standards/python-pygame.md)。项目副本只提供技术规则，不自动改写本机全局设置；已有本机权威正文时核对版本与内容。
+开发前实际读取 [通用开发规范1.7](support/standards/general-coding-standard.md)和 [Python / pygame补充1.5](support/standards/python-pygame.md)。项目副本只提供技术规则，不自动改写本机全局设置；已有本机权威正文时核对版本与内容。
 
 首次接手并准备编码、新增模块或改变职责与依赖边界时，按R02先在对话展示分层图、模块结构树、公开接口和状态归属，再实施。当前结构见 [技术架构](support/technical/architecture.md)。结构不变的局部修复可引用已展示的有效图；结构展示本身不增加审批。
+
+每次开发按R03围绕一个明确功能或职责组织可独立审阅的变更，先说明目标、必要文件及验证。大需求按依赖拆成连续批次，不夹带无关功能、批量格式化、重命名、搬迁或顺手重构；必要的接口、测试、配置、文档与允许清单仍须同步。范围扩大前说明原因，已有完整实施授权不因拆批逐次审批。
 
 ## 代码职责
 

@@ -109,6 +109,6 @@ hero-clock-out/
 
 `InputController`在正常追逐收到新的E按下事件时调用`Game.request_dash(dx, dy)`；有方向输入沿该方向，没有输入沿当前朝向。系统连发与按住E不触发第二轮，必须松开重新按。开场、对白、暂停、被抓与成功阶段拒绝请求；R重开创建新技能。技能期间改变方向不改变本次锁定向量。
 
-`DashSkill`独占ready、dashing、recovering阶段、方向和阶段秒数；不持有Actor或绘图资源。正式参数在game.json：dashDistance=128逻辑像素、dashSeconds=0.2秒、dashRecoverySeconds=0.8秒。完整恢复含两次喘息，恢复期间勇者零速、敌人正常追击、有效游戏时间正常推进；恢复后立即继续当前方向输入。没有额外无敌或独立冷却，动作完成后可再次按E。
+`DashSkill`独占ready、dashing、recovering阶段、方向和阶段秒数；不持有Actor或绘图资源。正式参数在game.json：dashDistance=128逻辑像素、dashSeconds=0.2秒、dashRecoverySeconds=0.4秒。完整恢复含两次喘息，恢复期间勇者零速、敌人正常追击、有效游戏时间正常推进；恢复后立即继续当前方向输入。没有额外无敌或独立冷却，动作完成后可再次按E。闪身和喘息期间不绘制距开门秒数，技能结束后秒数提示恢复。
 
 Game在技能、敌人转向、起跑缓冲、开门及墙面边界切分更新，候选与提交使用同一运动参数，连续比较最早接触与出口。Actor.seconds_until_wall只读查询实际速度将变化的时刻，已夹紧的轴不反复产生零时长事件。技能与角色只消费已处理秒数，暂停和终态冻结技能。dash_phase与dash_recovery_progress只读转发供Renderer查询；绘制重用四向角色帧表现两次上身下压和短气流，闪身残影独立拷贝，不污染资源或改变碰撞坐标。

@@ -36,4 +36,4 @@ python -m support.tools.check_git_scope --staged --history
 
 包验收从白名单生成干净快照，在无本机素材与制作目录的临时目录启动源码；再构建wheel，使用`--no-index --no-deps`离线安装到全新目录，运行实际console和`python -m hero_game`模块入口。无显示启动命令为`--headless --frames 3 --silent`，实际执行绘制和清理流程。每次报告区分工作区、索引、安装包和真实GUI，不把虚拟驱动或自动测试等同于人工画面与听感验收。
 
-正式Git数据是`hero_game/data/{game,dialogue,presentation}.json`。旧根配置已归档至`support/production/legacy_config/`，不继续作为配置来源。可发布纯技术文档位于`support/technical/`、项目专用补充`support/standards/python-pygame.md`及根技术入口；已审阅的`support/standards/general-coding-standard.md`随技术源码提供，与权威版本1.6.1保持一致；它不是运行依赖，缺少它不影响游戏启动。视频与制作文档集中在`support/production/`。新增技术文件仍要审阅正文并同步允许清单，不因为后缀为.py、.json或.md而自动准许上传。
+正式Git数据是`hero_game/data/{game,dialogue,presentation}.json`。旧根配置已归档至`support/production/legacy_config/`，不继续作为配置来源。可发布纯技术文档位于`support/technical/`、项目专用补充`support/standards/python-pygame.md`及根技术入口；已审阅的`support/standards/general-coding-standard.md`随技术源码提供，与权威版本1.7保持一致；它不是运行依赖，缺少它不影响游戏启动。视频与制作文档集中在`support/production/`。新增技术文件仍要审阅正文并同步允许清单，不因为后缀为.py、.json或.md而自动准许上传。

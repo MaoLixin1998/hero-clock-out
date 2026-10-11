@@ -158,6 +158,41 @@ class RenderingChecks(unittest.TestCase):
         # 可视变化证明玩家能看到秒数在走，而非只有内部计时改变。
         self.assertNotEqual(first, second)
 
+    # 闪身和喘息不画距开门秒数，技能结束后同一提示回到钟面下方。
+    def test_door_countdown_hides_only_during_dash_and_recovery(self) -> None:
+        # 拉长起跑，避免这一项被敌人接触打断。
+        rules = load_game_rules()
+        # 十秒缓冲只服务本项，不改正式默认起跑。
+        rules["startDelaySeconds"] = 10
+        # 跳过开场，直接进入可闪身的追逐。
+        model = create_game(rules=rules, play_intro=False)
+        # 程序资源足够检查文字有没有画上。
+        renderer = Renderer(model)
+        # 固定英文提示，不依赖本机中文字体。
+        renderer.font_path = None
+        # 向右闪身，确认技能确实开始。
+        self.assertTrue(model.request_dash(1, 0))
+        # 正式英文秒数，用来判断这行字有没有出现。
+        countdown = renderer.presentation["doorCountdownEnglish"].format(seconds=60)
+        # 记录闪身第一帧实际画过的文字。
+        with patch.object(renderer, "label", wraps=renderer.label) as labels:
+            # 画出闪身中的一帧。
+            renderer.draw()
+            # 这一帧不能出现距开门秒数。
+            self.assertNotIn(countdown, [call.args[0] for call in labels.call_args_list])
+        # 走完0.2秒闪身和0.4秒喘息。
+        for _ in range(12):
+            # 按住右方向，恢复结束后会继续跑。
+            model.update(0.05, 1, 0)
+        # 技能已经结束，后面的追逐可以再显示秒数。
+        self.assertEqual(model.dash_phase, "ready")
+        # 再记一帧恢复之后的文字。
+        with patch.object(renderer, "label", wraps=renderer.label) as labels:
+            # 画出追逐中的一帧。
+            renderer.draw()
+            # 秒数提示回到画面上。
+            self.assertIn(countdown, [call.args[0] for call in labels.call_args_list])
+
     # 到点后动态门、可达门槛与操作说明同时改变，背景缓存不得被改写。
     def test_real_shift_completion_opens_door_without_mutating_background(self) -> None:
         # 缩短正式时间比例，仅加速测试，不直接伪造door_open。

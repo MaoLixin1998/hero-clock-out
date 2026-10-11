@@ -71,15 +71,15 @@ class DashChecks(unittest.TestCase):
                 # 保存喘息起点与敌人位置。
                 hero_before, slime_before = copy(model.hero), copy(model.slime)
                 # 持续按方向，但恢复期间勇者仍不能移动。
-                self.advance(model, 0.8, (1, 0), fps)
+                self.advance(model, 0.4, (1, 0), fps)
                 # 原地恢复时脚底保持稳定。
                 self.assertEqual((model.hero.x, model.hero.y), (hero_before.x, hero_before.y))
-                # 敌人按120像素每秒追回96像素，没有跟着定格。
-                self.assertAlmostEqual(model.slime.x - slime_before.x, 96)
-                # 喘完恢复技能可用，并且游戏有效时间总共推进一秒。
+                # 敌人按120像素每秒在0.4秒恢复里追回48像素，没有跟着定格。
+                self.assertAlmostEqual(model.slime.x - slime_before.x, 48)
+                # 喘完恢复技能可用，闪身0.2秒加恢复0.4秒。
                 self.assertEqual(model.dash_phase, "ready")
                 # 世界计时没有漏掉恢复时长。
-                self.assertAlmostEqual(model.elapsed, 1)
+                self.assertAlmostEqual(model.elapsed, 0.6)
                 # 下一帧的持续方向输入直接恢复跑步。
                 model.update(1 / fps, 1, 0)
                 # 不要求玩家重新按方向键才能移动。
@@ -143,8 +143,8 @@ class DashChecks(unittest.TestCase):
         self.assertTrue(model.caught)
         # 结算位置位于敌人之前，未把角色提交到完整闪身终点。
         self.assertLess(model.hero.x, 290)
-        # 贴墙闪身让勇者无法拉开距离，敌人在恢复时追上。
-        model = self.make_game(heroSpawn=[540, 240], slimeSpawn=[450, 240])
+        # 贴墙闪身让勇者无法拉开距离，敌人在0.4秒恢复内追上。
+        model = self.make_game(heroSpawn=[540, 240], slimeSpawn=[462, 240])
         # 右向技能首先撞墙。
         model.request_dash(1, 0)
         # 完成闪身阶段时还未接触。
@@ -152,7 +152,7 @@ class DashChecks(unittest.TestCase):
         # 用例必须确实先进入喘息，不能在闪身时已经失败。
         self.assertFalse(model.caught)
         # 敌人继续追击，按住方向无法提前取消恢复。
-        self.advance(model, 0.8)
+        self.advance(model, 0.4)
         # 真实接触导致失败，喘息没有隐藏无敌。
         self.assertTrue(model.caught)
         # 终态不能继续消费恢复秒数。
@@ -289,7 +289,7 @@ class DashChecks(unittest.TestCase):
         self.advance(model, 0.2)
         # 恢复起点与每轮中间位置采样。
         frames = []
-        # 四个0.2秒间隔对应起点、第一次峰值、谷底、第二次峰值。
+        # 四个0.1秒间隔对应起点、第一次峰值、谷底、第二次峰值。
         for _ in range(4):
             # 保存绘制前模型事实，重复绘制必须完全只读。
             before = (copy(model.hero), model.elapsed, model.dash_recovery_progress)
@@ -302,7 +302,7 @@ class DashChecks(unittest.TestCase):
             # 绘图不能推进喘息或运动。
             self.assertEqual(before, (model.hero, model.elapsed, model.dash_recovery_progress))
             # 前进至下一采样时刻。
-            self.advance(model, 0.2)
+            self.advance(model, 0.1)
         # 起点与中间谷底是同一姿态。
         self.assertEqual(frames[0], frames[2])
         # 两次峰值是同一喘息姿态，确实重复两次。
